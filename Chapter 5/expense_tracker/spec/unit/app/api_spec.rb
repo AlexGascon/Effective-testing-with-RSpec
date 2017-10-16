@@ -41,8 +41,27 @@ module ExpenseTracker
       end
 
       context 'when the expense fails validation' do
-        it 'returns an error message'
-        it 'responds with a 422 (Unprocessable entity)'
+        let(:expense){ {'some' => 'data'} }
+
+        before do
+          # Mocking Ledger's behaviour
+          allow(ledger).to receive(:record)
+                               .with(expense)
+                               .and_return(RecordResult.new(false, 417, 'Expense incomplete'))
+        end
+
+        it 'returns an error message' do
+          post '/expenses', JSON.generate(expense)
+
+          parsed = JSON.parse(last_response.body)
+          expect(parsed).to include('error_message' => 'Expense incomplete')
+        end
+
+        it 'responds with a 422 (Unprocessable entity)' do
+          post '/expenses', JSON.generate(expense)
+
+          expect(last_response.status).to eq(422)
+        end
       end
     end
   end
