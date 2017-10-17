@@ -9,6 +9,10 @@ module ExpenseTracker
       API.new(ledger: ledger)
     end
 
+    def response
+      JSON.parse(last_response.body)
+    end
+
     # We won't define Ledger yet, as currently what we want to test is the API
     # Instead, we'll mock its behaviour.
     let(:ledger){ instance_double('ExpenseTracker::Ledger') }
@@ -28,8 +32,7 @@ module ExpenseTracker
         it 'returns the expense id' do
           post '/expenses', JSON.generate(expense)
 
-          parsed = JSON.parse(last_response.body)
-          expect(parsed).to include('expense_id' => 417)
+          expect(response).to include('expense_id' => 417)
         end
 
         it 'responds with a 200 (OK)' do
@@ -51,8 +54,7 @@ module ExpenseTracker
         it 'returns an error message' do
           post '/expenses', JSON.generate(expense)
 
-          parsed = JSON.parse(last_response.body)
-          expect(parsed).to include('error' => 'Expense incomplete')
+          expect(response).to include('error' => 'Expense incomplete')
         end
 
         it 'responds with a 422 (Unprocessable entity)' do
