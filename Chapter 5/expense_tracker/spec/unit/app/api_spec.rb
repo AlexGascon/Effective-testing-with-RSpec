@@ -64,5 +64,51 @@ module ExpenseTracker
         end
       end
     end
+
+    describe 'GET /expenses/:date' do
+      let(:date){ '2017-06-12' }
+
+      context 'when expenses exist on the given date' do
+        let(:expenses_on_date){ JSON.generate([{'some' => 'data'}])}
+
+        before do
+          allow(ledger).to receive(:expenses_on)
+                               .with(date)
+                               .and_return(expenses_on_date)
+        end
+
+        it 'returns the expense records as JSON' do
+          get "/expenses/#{date}"
+
+          expect(last_response.body).to eq(JSON.generate([{'some' => 'data'}]))
+        end
+
+        it 'responds with a 200 (OK)' do
+          get "/expenses/#{date}"
+
+          expect(last_response.status).to eq(200)
+        end
+      end
+
+      context 'when there are no expenses on the given date' do
+        before do
+          allow(ledger).to receive(:expenses_on)
+                               .with(date)
+                               .and_return(JSON.generate([]))
+        end
+
+        it 'returns an empty array as JSON' do
+          get "/expenses/#{date}"
+
+          expect(last_response.body).to eq(JSON.generate([]))
+        end
+
+        it 'responds with a 200 (OK)' do
+          get "/expenses/#{date}"
+
+          expect(last_response.status).to eq(200)
+        end
+      end
+    end
   end
 end
