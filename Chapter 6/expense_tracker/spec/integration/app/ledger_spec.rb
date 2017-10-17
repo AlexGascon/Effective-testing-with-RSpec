@@ -1,15 +1,14 @@
 require_relative '../../../app/ledger'
 require_relative '../../../config/sequel'
-require_relative '../../support/db'
 
 module ExpenseTracker
-  RSpec.describe Ledger, :aggregate_failures do
+  RSpec.describe Ledger, :aggregate_failures, :db do
     let(:ledger) { Ledger.new }
     let(:expense) do
       {
-        'payee': 'Starbucks',
-        'amount': '5.75',
-        'date': '2017-06-10'
+        'payee' => 'Starbucks',
+        'amount' => '5.75',
+        'date' => '2017-06-10'
       }
     end
 
@@ -37,6 +36,7 @@ module ExpenseTracker
 
           expect(result).not_to be_success
           expect(result.id).to eq(nil)
+          expect(result.expense_id).to eq(nil)
           expect(result.error_message).to include ('`payee` is required')
 
           expect(DB[:expenses].count).to eq(0)
