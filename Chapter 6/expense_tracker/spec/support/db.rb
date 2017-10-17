@@ -6,4 +6,9 @@ RSpec.configure do |c|
     # Removing any possible leftover data
     DB[:expenses].truncate
   end
+
+  # For each example marked as requiring the DB (that means the :db tag)
+  c.around(:example, :db) do |example|
+    DB.transaction(rollback: :always){ example.run }
+  end
 end
