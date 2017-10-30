@@ -28,16 +28,38 @@ module ExpenseTracker
                                              )]
         end
 
-        it 'when the expense lacks a payee' do
-          expense.delete('payee')
+        context 'fails' do
+          it 'when the expense lacks a payee' do
+            expense.delete('payee')
 
-          result = ledger.record(expense)
+            result = ledger.record(expense)
 
-          expect(result).not_to be_success
-          expect(result.expense_id).to eq(nil)
-          expect(result.error_message).to include ('payee is required')
+            expect(result).not_to be_success
+            expect(result.expense_id).to eq(nil)
+            expect(result.error_message).to include ('payee is required')
 
-          expect(DB[:expenses].count).to eq(0)
+            expect(DB[:expenses].count).to eq(0)
+          end
+
+          it 'when the expense lacks an amount' do
+            expense.delete('amount')
+
+            result = ledger.record(expense)
+
+            expect(result).not_to be_success
+            expect(result.expense_id).to eq(nil)
+            expect(result.error_message).to include ('amount is required')
+          end
+
+          it 'when the expense lacks a date' do
+            expense.delete('date')
+
+            result = ledger.record(expense)
+
+            expect(result).not_to be_success
+            expect(result.expense_id).to eq(nil)
+            expect(result.error_message).to include ('date is required')
+          end
         end
       end
 
