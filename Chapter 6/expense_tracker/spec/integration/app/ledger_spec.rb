@@ -35,7 +35,7 @@ module ExpenseTracker
 
           expect(result).not_to be_success
           expect(result.expense_id).to eq(nil)
-          expect(result.error_message).to include ('`payee` is required')
+          expect(result.error_message).to include ('payee is required')
 
           expect(DB[:expenses].count).to eq(0)
         end
