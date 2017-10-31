@@ -1,6 +1,8 @@
 require 'sinatra/base'
 require 'json'
+require 'ox'
 require_relative 'ledger'
+require 'pry'
 
 module ExpenseTracker
 	class API < Sinatra::Base
@@ -9,8 +11,19 @@ module ExpenseTracker
 			super()
 		end
 
+		def parse_expense(request)
+			case request.media_type
+				when 'text/xml'
+					nil
+				when 'application/json', 'application/x-www-form-urlencoded', ''
+					JSON.parse(request.body.read)
+				else
+					nil
+			end
+		end
+
 		post '/expenses' do
-      expense = JSON.parse(request.body.read)
+      expense = parse_expense(request)
       result = @ledger.record(expense)
 
       if result.success?
