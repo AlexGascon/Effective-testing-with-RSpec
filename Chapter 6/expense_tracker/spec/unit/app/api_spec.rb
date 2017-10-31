@@ -18,9 +18,10 @@ module ExpenseTracker
     let(:ledger){ instance_double('ExpenseTracker::Ledger') }
 
     describe 'POST /expenses' do
+      # We don't need real data because we're mocking the behaviour
+      let(:expense){ {'some' => 'data'} }
+
       context 'when the expense is successfully recorded' do
-        # We don't need real data because we're mocking the behaviour
-        let(:expense){ {'some' => 'data'} }
 
         before do
           # Mocking Ledger's behaviour
@@ -61,6 +62,47 @@ module ExpenseTracker
           post '/expenses', JSON.generate(expense)
 
           expect(last_response.status).to eq(422)
+        end
+      end
+
+      context 'input data format' do
+
+        before do
+          # Mocking Ledger's behaviour
+          # We don't want to test ledger, but the data formats
+          allow(ledger).to receive(:record)
+                               .with(expense)
+                               .and_return(RecordResult.new(true, 417, nil))
+        end
+
+        it 'is JSON by default' do
+          post '/expenses', JSON.generate(expense)
+
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'is JSON if we set Content-Type header to application/json' do
+          post '/expenses', JSON.generate(expense)  do
+            header['Content-Type'] = 'application/json'
+          end
+
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'is XML if we set Content-Type header to text/xml' do
+          post '/expenses'do
+            header['Content-Type'] = 'text/xml'
+          end
+
+          expect(last_response.status).to eq(200)
+        end
+
+        it 'generates an error if the requested type isn\'t JSON or XML' do
+          post '/expenses', JSON.generate(expense)  do
+            header['Content-Type'] = 'random/content_type'
+          end
+
+          expect(last_response.status).to eq(415)
         end
       end
     end
@@ -108,6 +150,14 @@ module ExpenseTracker
 
           expect(last_response.status).to eq(200)
         end
+      end
+
+      context 'output data format' do
+        it 'is JSON by default'
+
+        it 'is JSON if we set Accept header to application/json'
+
+        it 'is XML if we set Accept header to text/xml'
       end
     end
   end
